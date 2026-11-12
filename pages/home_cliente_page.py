@@ -1,4 +1,3 @@
-"""Page Object da loja vista pelo cliente (/home)."""
 from playwright.sync_api import Page
 
 
@@ -13,6 +12,9 @@ class HomeClientePage:
         self.botao_logout = page.get_by_test_id("logout")
 
     def pesquisar(self, termo: str):
+        # Espera a lista inicial de produtos carregar antes de pesquisar;
+        # sem isso, a lista completa pode chegar depois e sobrescrever o filtro.
+        self.cards.first.wait_for()
         self.campo_pesquisa.fill(termo)
         self.botao_pesquisar.click()
 
