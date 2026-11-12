@@ -1,0 +1,41 @@
+name: Testes automatizados - ServeRest
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 11 * * 1-5"   # dias úteis às 08:00 (horário de Brasília)
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar o código
+        uses: actions/checkout@v4
+
+      - name: Instalar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Instalar dependências
+        run: |
+          pip install -r requirements.txt
+          playwright install --with-deps chromium
+
+      - name: Executar testes de API
+        run: pytest -m api --html=reports/relatorio-api.html
+
+      - name: Executar testes web
+        if: always()
+        run: pytest -m web --html=reports/relatorio-web.html
+
+      - name: Publicar relatórios e evidências
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: relatorios-de-teste
+          path: |
+            reports/
+            test-results/
